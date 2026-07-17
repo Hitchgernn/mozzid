@@ -1,0 +1,41 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+*.iml
+.idea/
+.vscode/
+
+# Generated localization
+lib/l10n/gen/
+
+# Platform build artifacts
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+android/key.properties
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Generated.xcconfig
+DerivedData/
+
+# Firebase (optional sync layer — not committed)
+google-services.json
+GoogleService-Info.plist
+lib/firebase_options.dart
+
+# OS / editor
+.DS_Store
+*.log
+
+# Claude / codegraph tooling
+.claude/
+.codegraph/
