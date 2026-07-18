@@ -12,6 +12,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/typography.dart';
 import '../../domain/models/classification_result.dart';
 import '../../domain/models/species.dart';
+import '../providers/bootstrap.dart';
 import '../providers/record_controller.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/confidence_ring.dart';

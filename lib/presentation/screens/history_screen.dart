@@ -6,6 +6,9 @@ import '../../core/l10n_ext.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/typography.dart';
 import '../../domain/models/detection.dart';
+import '../../domain/models/species.dart';
+import '../../domain/repositories/species_repository.dart';
+import '../../domain/stats/detection_stats.dart';
 import '../../domain/stats/log_filters.dart';
 import '../providers/bootstrap.dart';
 import '../providers/detection_providers.dart';
@@ -102,8 +105,8 @@ class _EmptyState extends StatelessWidget {
 
 class _StatsCard extends StatelessWidget {
   const _StatsCard({required this.stats, required this.species});
-  final dynamic stats; // DetectionStats
-  final dynamic species; // SpeciesRepository
+  final DetectionStats stats;
+  final SpeciesRepository species;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +139,7 @@ class _StatsCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(stats.peakWindow as String,
+                    Text(stats.peakWindow!,
                         style: MozzType.sans(size: 13, weight: FontWeight.w600, color: c.accent)),
                     const SizedBox(height: 3),
                     Text(l.mostActive, style: MozzType.sans(size: 11, color: c.text4)),
@@ -153,7 +156,7 @@ class _StatsCard extends StatelessWidget {
                 children: [
                   for (final b in stats.breakdown)
                     Expanded(
-                      flex: (b.percent as int).clamp(1, 100),
+                      flex: b.percent.clamp(1, 100),
                       child: Container(color: species.byId(b.speciesId)?.dotColor ?? c.accent),
                     ),
                 ],
@@ -197,17 +200,16 @@ class _Filters extends StatelessWidget {
   const _Filters({required this.filter, required this.ref, required this.species});
   final LogFilter filter;
   final WidgetRef ref;
-  final dynamic species;
+  final SpeciesRepository species;
 
   @override
   Widget build(BuildContext context) {
-    final c = context.c;
     final l = context.l;
     final notifier = ref.read(logFilterProvider.notifier);
     final chips = <(String?, String)>[
       (null, l.allSpecies),
-      for (final s in species.all() as List)
-        (s.id as String, (s.scientificName as String).split(' ').first),
+      for (final s in species.all())
+        (s.id, s.scientificName.split(' ').first),
     ];
 
     return Column(
@@ -299,12 +301,12 @@ class _Chip extends StatelessWidget {
 class _LogRow extends StatelessWidget {
   const _LogRow({required this.detection, required this.species});
   final Detection detection;
-  final dynamic species;
+  final SpeciesRepository species;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final s = species.byId(detection.speciesId);
+    final Species? s = species.byId(detection.speciesId);
     final time = DateFormat.jm().format(detection.timestamp);
     final date = DateFormat.MMMd().format(detection.timestamp);
     return GestureDetector(

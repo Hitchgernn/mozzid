@@ -35,7 +35,7 @@ class _MozzMascotState extends State<MozzMascot>
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    Widget painter = AnimatedBuilder(
+    final Widget painter = AnimatedBuilder(
       animation: _wing,
       builder: (_, __) => CustomPaint(
         size: Size.square(widget.size),

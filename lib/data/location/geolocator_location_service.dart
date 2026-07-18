@@ -28,10 +28,8 @@ class GeolocatorLocationService implements LocationService {
       if (!await Geolocator.isLocationServiceEnabled()) return GeoFix.none;
       if (!await hasPermission()) return GeoFix.none;
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 8),
-        ),
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 8),
       );
       return GeoFix(latitude: pos.latitude, longitude: pos.longitude);
     } catch (_) {
