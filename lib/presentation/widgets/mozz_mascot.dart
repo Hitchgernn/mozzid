@@ -42,6 +42,7 @@ class _MozzMascotState extends State<MozzMascot>
         painter: _MascotPainter(
           wing: _wing.value,
           accent: c.accent,
+          accent2: c.accent2,
           accentHi: c.accentHi,
           ink: c.accentInk,
         ),
@@ -63,12 +64,14 @@ class _MascotPainter extends CustomPainter {
   _MascotPainter({
     required this.wing,
     required this.accent,
+    required this.accent2,
     required this.accentHi,
     required this.ink,
   });
 
   final double wing; // 0..1 flap
   final Color accent;
+  final Color accent2;
   final Color accentHi;
   final Color ink;
 
@@ -76,8 +79,12 @@ class _MascotPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = size.width / 120.0;
     Offset pt(double x, double y) => Offset(x * s, y * s);
+    // Body shades derived from the accent so the whole mascot recolours:
+    // deep accent for limbs, mid for abdomen, base for thorax, bright for head.
+    final limb = accent2;
+    final abdomen = Color.lerp(accent2, accent, 0.5)!;
     final legPaint = Paint()
-      ..color = const Color(0xFF0E9384)
+      ..color = limb
       ..strokeWidth = 2.5 * s
       ..strokeCap = StrokeCap.round;
     final antPaint = Paint()
@@ -116,16 +123,16 @@ class _MascotPainter extends CustomPainter {
     // Abdomen + stripes.
     canvas.drawOval(
       Rect.fromCenter(center: pt(60, 82), width: 30 * s, height: 48 * s),
-      Paint()..color = const Color(0xFF17B9A6),
+      Paint()..color = abdomen,
     );
     final stripe = Paint()
-      ..color = const Color(0x40041D1D)
+      ..color = ink.withValues(alpha: 0.25)
       ..strokeWidth = 2 * s;
     canvas.drawLine(pt(47, 80), pt(73, 80), stripe);
     canvas.drawLine(pt(48, 90), pt(72, 90), stripe);
 
     // Thorax + head.
-    canvas.drawCircle(pt(60, 58), 13 * s, Paint()..color = const Color(0xFF20C4B1));
+    canvas.drawCircle(pt(60, 58), 13 * s, Paint()..color = accent);
     canvas.drawCircle(pt(60, 42), 15 * s, Paint()..color = accentHi);
 
     // Eyes.
@@ -146,5 +153,5 @@ class _MascotPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MascotPainter old) =>
-      old.wing != wing || old.accent != accent;
+      old.wing != wing || old.accent != accent || old.accent2 != accent2;
 }
