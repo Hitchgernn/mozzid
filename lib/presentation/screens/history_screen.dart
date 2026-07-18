@@ -52,7 +52,11 @@ class HistoryScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
-                child: StylizedMap(detections: filtered, species: species),
+                child: StylizedMap(
+                  detections: filtered,
+                  species: species,
+                  animateKey: '${filter.speciesId ?? 'all'}-${filter.range.name}',
+                ),
               ),
             ),
             SliverToBoxAdapter(

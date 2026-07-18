@@ -20,10 +20,15 @@ class StylizedMap extends StatelessWidget {
     super.key,
     required this.detections,
     required this.species,
+    this.animateKey = '',
   });
 
   final List<Detection> detections;
   final SpeciesRepository species;
+
+  /// Changes whenever the active filter changes; used to re-key the pins so
+  /// they replay their drop-in animation on each filter switch.
+  final String animateKey;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +83,7 @@ class StylizedMap extends StatelessWidget {
     double span(double v, double lo, double hi) =>
         hi - lo < 1e-9 ? 0.5 : (v - lo) / (hi - lo);
 
+    var i = 0;
     return [
       for (final d in located)
         Align(
@@ -85,43 +91,102 @@ class StylizedMap extends StatelessWidget {
             (0.12 + 0.76 * span(d.longitude!, minLng, maxLng)) * 2 - 1,
             (0.15 + 0.6 * (1 - span(d.latitude!, minLat, maxLat))) * 2 - 1,
           ),
-          child: _Pin(color: species.byId(d.speciesId)?.dotColor ?? context.c.accent),
+          child: _AnimatedPin(
+            key: ValueKey('$animateKey-${d.id}'),
+            color: species.byId(d.speciesId)?.dotColor ?? context.c.accent,
+            delay: Duration(milliseconds: 80 * i++),
+          ),
         ),
     ];
   }
 }
 
-class _Pin extends StatelessWidget {
-  const _Pin({required this.color});
+/// A map pin that drops in with a staggered pop when first shown. Re-created
+/// (and thus re-animated) whenever its [ValueKey] changes on a filter switch.
+class _AnimatedPin extends StatefulWidget {
+  const _AnimatedPin({super.key, required this.color, required this.delay});
   final Color color;
+  final Duration delay;
+
+  @override
+  State<_AnimatedPin> createState() => _AnimatedPinState();
+}
+
+class _AnimatedPinState extends State<_AnimatedPin>
+    with SingleTickerProviderStateMixin {
+  // mzPin: scale 0 → 1.15 (at 60%) → 1, over 0.5s with an ease-out settle.
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 500),
+  );
+  late final Animation<double> _scale = TweenSequence<double>([
+    TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.15), weight: 60),
+    TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 40),
+  ]).animate(CurvedAnimation(parent: _c, curve: const Cubic(0.2, 0.8, 0.2, 1)));
+
+  static const double _deg45 = 0.7853981633974483;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(widget.delay, () {
+      if (mounted) _c.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return Transform.rotate(
-      angle: -0.785398, // -45°
+    // Teardrop: 22×22 with three rounded corners, sharp bottom-left, rotated
+    // -45° so the point faces down. Rotation is on this inner element; the
+    // scale animation is on the outer wrapper, so they don't fight.
+    final teardrop = Transform.rotate(
+      angle: -_deg45,
       child: Container(
         width: 22,
         height: 22,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: color,
+          color: widget.color,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(11),
             topRight: Radius.circular(11),
-            bottomLeft: Radius.circular(11),
+            bottomRight: Radius.circular(11),
           ),
           border: Border.all(color: c.bg, width: 2),
-          boxShadow: [BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 12, spreadRadius: -2)],
+          boxShadow: [
+            BoxShadow(color: widget.color.withValues(alpha: 0.5), blurRadius: 12, spreadRadius: -2),
+          ],
         ),
         child: Transform.rotate(
-          angle: 0.785398,
+          angle: _deg45,
           child: Container(
             width: 6,
             height: 6,
             decoration: BoxDecoration(color: c.bg, shape: BoxShape.circle),
           ),
         ),
+      ),
+    );
+
+    // Anchor the tip on the coordinate (like CSS translate(-50%,-100%)), and
+    // scale from that tip so the pin grows out of its point.
+    return FractionalTranslation(
+      translation: const Offset(0, -0.5),
+      child: AnimatedBuilder(
+        animation: _scale,
+        builder: (context, child) => Transform.scale(
+          scale: _scale.value,
+          alignment: Alignment.bottomCenter,
+          child: child,
+        ),
+        child: teardrop,
       ),
     );
   }
