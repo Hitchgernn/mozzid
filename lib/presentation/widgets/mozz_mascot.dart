@@ -35,16 +35,19 @@ class _MozzMascotState extends State<MozzMascot>
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    final Widget painter = AnimatedBuilder(
-      animation: _wing,
-      builder: (_, __) => CustomPaint(
-        size: Size.square(widget.size),
-        painter: _MascotPainter(
-          wing: _wing.value,
-          accent: c.accent,
-          accent2: c.accent2,
-          accentHi: c.accentHi,
-          ink: c.accentInk,
+    // RepaintBoundary isolates the ~60fps wing repaint from the rest of the UI.
+    final Widget painter = RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _wing,
+        builder: (_, __) => CustomPaint(
+          size: Size.square(widget.size),
+          painter: _MascotPainter(
+            wing: _wing.value,
+            accent: c.accent,
+            accent2: c.accent2,
+            accentHi: c.accentHi,
+            ink: c.accentInk,
+          ),
         ),
       ),
     );

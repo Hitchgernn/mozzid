@@ -179,14 +179,16 @@ class _AnimatedPinState extends State<_AnimatedPin>
     // scale from that tip so the pin grows out of its point.
     return FractionalTranslation(
       translation: const Offset(0, -0.5),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder: (context, child) => Transform.scale(
-          scale: _scale.value,
-          alignment: Alignment.bottomCenter,
-          child: child,
+      child: RepaintBoundary(
+        child: AnimatedBuilder(
+          animation: _scale,
+          builder: (context, child) => Transform.scale(
+            scale: _scale.value,
+            alignment: Alignment.bottomCenter,
+            child: child,
+          ),
+          child: teardrop,
         ),
-        child: teardrop,
       ),
     );
   }

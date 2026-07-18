@@ -36,7 +36,8 @@ class _SpectrogramState extends State<Spectrogram>
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return Container(
+    return RepaintBoundary(
+      child: Container(
       width: 280,
       height: 120,
       padding: const EdgeInsets.all(10),
@@ -74,6 +75,7 @@ class _SpectrogramState extends State<Spectrogram>
               ),
           ],
         ),
+      ),
       ),
     );
   }
