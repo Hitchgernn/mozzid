@@ -45,3 +45,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true # builds l10n from lib/l10n/*.arb
+  assets:
+    # Bundled Spectral / IBM Plex fonts so google_fonts serves them offline
+    # (no first-launch network fetch / text reflow).
+    - assets/google_fonts/
