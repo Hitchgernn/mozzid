@@ -251,7 +251,11 @@ class _Metrics extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.c;
     final l = context.l;
-    return Row(
+    // IntrinsicHeight bounds the row's height so the two cards can stretch to
+    // equal height inside the scroll view (plain stretch would force infinite
+    // height here and break layout + hit-testing).
+    return IntrinsicHeight(
+      child: Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
@@ -300,6 +304,7 @@ class _Metrics extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
